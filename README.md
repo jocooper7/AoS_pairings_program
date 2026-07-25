@@ -4,6 +4,7 @@ Pairings program to analyze 5x5 differential matrices and determine ideal pairin
 Author: Jo Cooper
 Requirements: Pandas, Numpy
 
+------------------------------------------------------------------------------------------
 Set up: 
 Program is run in a single .py in the CLI. 
 I have provided a JSON that is currently filled with randomized differentials for testing.
@@ -15,6 +16,7 @@ Doing so has the potential to prohibit the program from running properly.
 User team members, factions, and enemy teams can be modified inside the program under the Base Variables and Lists section.
 Order of enemy_teams list does not matter, but spelling must match teams in JSON as enemy_teams list is used for validation
 
+------------------------------------------------------------------------------------------
 Extended Program Summary:
 Program analyzes a differential matrix pulled from the JSON file. User determines the opponent team and current map. The program then pulls the data and creates a DataFrame.
 Program then provides information to aid the user in determining mathematically optimal pairings based on projected differentials. 
