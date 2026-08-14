@@ -2,16 +2,16 @@
 Pairings program to analyze 5x5 differential matrices and determine ideal pairings for user decided opponent and map.
 
 Author: Jo Cooper
-Requirements: Pandas, Numpy
+Requirements: Pandas, Numpy, JSONschema
 
 ------------------------------------------------------------------------------------------
 Set up: 
-Program is run in a single .py in the CLI. 
+Program is run in via the pairing_program.py in the CLI. 
 I have provided a JSON that is currently filled with randomized differentials for testing.
 Users can modify the JSON with their own differential values or modify faction_names. 
 
-User team and factions can be modified during program use. 
-enemy teams and maps are pulled from JSON file. Teams can be in any order. Maps should have consistent order, tense, and spelling throughout the JSON
+User factions can be modified during program use. 
+Enemy teams and maps are pulled from JSON file. Teams can be in any order. Maps should have consistent order, tense, and spelling throughout the JSON
 
 ------------------------------------------------------------------------------------------
 Extended Program Summary:
@@ -20,4 +20,4 @@ Program then provides information to aid the user in determining mathematically 
 Metrics include mean of differentials for each user army, standard deviation of these differentials, and an ideal pairings list based on maximum bipartite matching.
  - Each matrix is 5x5, allowing for brute forcing the math with only 5! (120) permutations.
 
-TODO: Progress through pairings minigame & Maximum bipartite algorithm
+TODO: Maximum bipartite matching algorithm
