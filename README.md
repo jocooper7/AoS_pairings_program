@@ -1,23 +1,25 @@
 # AoS_pairings_program
-Pairings program to analyze 5x5 differential matrices and determine ideal pairings for user decided opponent and map.
+Pairings program to analyze 5x5 differential matrices and determine ideal pairings for user-decided opponent and map.
 
-Author: Jo Cooper
-Requirements: Pandas, Numpy, JSONschema
+**Author:** Jo Cooper
+**Requirements:** Python 3.x, Pandas, Numpy, JSONschema (`pip install pandas numpy jsonschema`)
+
+## Setup
+Run via `pairing_program.py` in the CLI:
+------------------------------------------------------------------------------------------
+A JSON file with randomized test differentials is included. Users can modify it with their own differential values or edit `faction_names`. User factions can also be changed during program use.
+
+Enemy teams and maps are pulled from the JSON file. Teams can be in any order. Maps should be consistent in tense and spelling throughout. Including the same 5 maps for each team is required.
+
+For opponent selection, users can either manually choose the enemy team or use the **random opponent mode**, which auto-selects an opponent for testing/quick play.
 
 ------------------------------------------------------------------------------------------
-Set up: 
-Program is run in via the pairing_program.py in the CLI. 
-I have provided a JSON that is currently filled with randomized differentials for testing.
-Users can modify the JSON with their own differential values or modify faction_names. 
+## Extended Program Summary
+The program analyzes a differential matrix pulled from the JSON file. The user selects the opponent team and current map; the program pulls the relevant data and builds a DataFrame.
 
-User factions can be modified during program use. 
-Enemy teams and maps are pulled from JSON file. Teams can be in any order. Maps should have consistent order, tense, and spelling throughout the JSON
+It then reports:
+- Mean and median differentials for each user army
+- Standard deviation of these differentials
+- An ideal pairings list based on maximum bipartite matching
 
-------------------------------------------------------------------------------------------
-Extended Program Summary:
-Program analyzes a differential matrix pulled from the JSON file. User determines the opponent team and current map. The program then pulls the data and creates a DataFrame.
-Program then provides information to aid the user in determining mathematically optimal pairings based on projected differentials. 
-Metrics include mean of differentials for each user army, standard deviation of these differentials, and an ideal pairings list based on maximum bipartite matching.
- - Each matrix is 5x5, allowing for brute forcing the math with only 5! (120) permutations.
-
-TODO: Maximum bipartite matching algorithm
+Each matrix is 5x5, so the pairing math is brute-forced with all 5! (120) permutations, implemented via `itertools`, to guarantee the true maximum-sum pairing rather than an approximation.
