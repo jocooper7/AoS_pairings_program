@@ -1,6 +1,9 @@
+# imports
 import json
+
 from jsonschema import validate, ValidationError
 
+# This file contains validation functions for the pairings program.
 
 # schema creation for validation 
 valid_schema = {
@@ -73,7 +76,7 @@ def boolean_validation(prompt: str) -> bool:
         elif value in ['no', 'n']:
             return False
         else:
-            print("Invalid input. Please enter 'yes' or 'no'.")
+            print("Invalid input. Please enter 'yes/y' or 'no/n'.")
 
 def string_validation(prompt: str) -> str:
     while True:
@@ -90,8 +93,16 @@ def json_file_validation(file_path: str) -> bool:
         with open(file_path, 'r') as file:
             data = json.load(file)
             validate(instance = data, schema = valid_schema)
+
+            # Checks for consistent map names across all teams
+            map_sets = [frozenset(m["map_name"] for m in team["maps"]) for team in data]
+            if len(set(map_sets)) > 1:
+                raise ValueError(f"Inconsistent map sets across teams. Ensure consistent map spelling across all teams in the JSON file.")
         return True
-    except (json.JSONDecodeError, ValidationError) as e:
+    except FileNotFoundError:
+        print(f"Error: JSON file '{file_path}' not found.")
+        return False
+    except (json.JSONDecodeError, ValidationError, ValueError) as e:
         print(f"Invalid JSON file: {e}")
         return False
 
@@ -104,7 +115,7 @@ def team_validation(prompt: str, curr_dict: dict, curr_set: set) -> int:
                     else:
                         break
                 else:
-                    print(f"Invalid input. Please enter a valid army name from teams: {set(curr_dict.keys()) - curr_set}")
+                    print(f"Invalid input. Please enter a valid army name from available teams: {set(curr_dict.keys()) - curr_set}")
     curr_set.add(curr)
     ind = curr_dict[curr]
     return ind

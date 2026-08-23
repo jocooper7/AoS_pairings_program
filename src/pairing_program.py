@@ -1,14 +1,17 @@
 # Age of Sigmar Teams Matchup Program
 
 # imports
-import warnings
-import pandas as pd
-warnings.simplefilter(action='ignore', category=pd.errors.PerformanceWarning)
 import json
 import os
+import warnings
 
-from match_modules import match_validation as mv
+import pandas as pd
+
 from match_modules import match_ui as mui
+from match_modules import match_validation as mv
+
+# ignore pandas performance warnings as the size of the matrices is small and performance is not a concern for this program.
+warnings.simplefilter(action='ignore', category=pd.errors.PerformanceWarning)
 
 # Base Variables and Lists
 default_factions = ["Soulblight Gravelords", "Seraphon", "Maggotkin of Nurgle", "Disciples of Tzeentch", "Skaven"]
@@ -40,7 +43,6 @@ def create_dataframe(factions: list, opponent_team: str, selected_map: str) -> p
     except StopIteration:
         print(f"Error: Could not find data for map '{selected_map}'.")
         print("Please check the JSON file and ensure the data is correct.")
-        print("Ensure the map_name field matches in order and tense across all teams in the JSON file.")
         exit(1)
 
 # Functions to change team members, factions, and maps
@@ -84,6 +86,7 @@ def add_maps() -> list:
         with open(JSON_PATH) as file:
             data = json.load(file)
             maps = list({map_info["map_name"] for team in data for map_info in team["maps"]})
+        maps.sort()  # Sort maps alphabetically for consistent user experience
         return maps
     except FileNotFoundError:
         print("Error: matchup_doc.json file not found.")
@@ -102,7 +105,8 @@ def matchup_selection(enemy_list, maps_list) -> tuple[int, int]:
         mui.display_map_selection(maps_list)
         map_num = mv.int_validation("Select Number (press Enter to continue): ", 1, len(maps_list))
         print()
-        print(f"You selected enemy team: {enemy_list[enemy - 1]} and map: {maps_list[map_num - 1]}.")
+        print(f"You selected Enemy Team: {enemy_list[enemy - 1]}")
+        print(f"             Map:        {maps_list[map_num - 1]}.")
         ready = mv.boolean_validation("Is this correct? (yes/y or no/n): ")
     return enemy - 1, map_num - 1
 
@@ -120,6 +124,8 @@ def run_program():
 
     # allows user to change user team info (members and armies) if needed.
     factions = change_info()
+
+    randomize = mv.boolean_validation("Would you like the enemy army selections to be randomized? (yes/y or no/n): ")
         
     # pulls team name data from JSON file and creates a list of enemy teams for selection.
     enemy_teams = add_enemy_teams()
@@ -128,7 +134,7 @@ def run_program():
     enemy_selection, map_selection = matchup_selection(enemy_teams, map_options)
 
     # Create DataFrame from JSON file and selections
-    # NOTE: The JSON file's matrices are currently filled with randomized differentials for testing purposes. 
+    # NOTE: The JSON file's matrices are filled with randomized differentials for testing purposes. 
     df = create_dataframe(factions, enemy_teams[enemy_selection], map_options[map_selection])
     df.index = df.index.get_level_values(0)
     enemy_armies = df.columns.tolist()
@@ -142,23 +148,26 @@ def run_program():
         ally_dict[army] = i
     ally_set = set()
 
-    mui.display_matrix("Differential Matrix Display: ", df)
+    print("-" * 100)
+    mui.display_matrix(df, "\nDifferential Matrix Display: ")
 
     match_list = []
-    match_list.extend(mui.round_one_selection(df, ally_dict, enemy_dict, ally_set, enemy_set, factions, enemy_armies))
+    matches, best_total = mui.round_one_selection(df, ally_dict, enemy_dict, ally_set, enemy_set, factions, enemy_armies, randomize)
+    match_list.extend(matches)
     ally_one, enemy_one = match_list[0]
     ally_two, enemy_two = match_list[1]
+
+    current_total = df.at[factions[ally_one], enemy_armies[enemy_one]] + df.at[factions[ally_two], enemy_armies[enemy_two]]
 
     df_copy = df.drop(index=[factions[ally_one], factions[ally_two]])
     df_copy = df_copy.drop(columns=[enemy_armies[enemy_one], enemy_armies[enemy_two]])
 
-    match_list.extend(mui.round_two_selection(df_copy, ally_dict, enemy_dict, ally_set, enemy_set, factions, enemy_armies))
+    round_two_matches, round_two_total = mui.round_two_selection(df_copy, ally_dict, enemy_dict, ally_set, enemy_set, factions, enemy_armies, current_total, randomize)
+    match_list.extend(round_two_matches)
 
-    print(df)
+    mui.final_pairings(match_list, factions, enemy_armies, df, best_total, round_two_total)
 
-    mui.final_pairings(match_list, factions, enemy_armies, df)
-
-    print("\nProgram completed. Thank you for using the Age of Sigmar Teams Matchup Program!\n")
+    print("\nGood Luck! Thank you for using the Age of Sigmar Teams Match-making Program!\n")
 
 if __name__ == "__main__":
     run_program()
